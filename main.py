@@ -2,8 +2,17 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from fastapi.middleware.cors import CORSMiddleware
+import random
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['http://localhost:3000'],
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 texts = [
     "привет",
@@ -45,8 +54,15 @@ labels = [
     0
 ]
 
-vectorizer = TfidfVectorizer()
+responses = {
+    1: ["Привет!", "Здарова!", "Хай!"],
+    0: ["Я не понимаю", "Что?"]
+}
+
+vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 4))
 X = vectorizer.fit_transform(texts)
+
+print(X.toarray())
 
 model = LogisticRegression()
 model.fit(X, labels)
@@ -56,4 +72,7 @@ class Message(BaseModel):
 
 @app.post('/classify')
 def classify(message: Message):
-    return { 'received': int(model.predict(vectorizer.transform([message.text]))[0]) }
+    response = int(model.predict(vectorizer.transform([message.text]))[0]) 
+    return { 
+        'received': random.choice(responses[response])
+    }
