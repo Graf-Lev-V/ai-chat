@@ -15,7 +15,7 @@ export default function Home() {
 
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>): void {
     e.preventDefault() 
-    setMessages([...messages, {id: crypto.randomUUID(), text: message, author: 'user'}])
+    setMessages([...messages, {id: crypto.randomUUID(), text: message, author: 'User'}])
     sendMessage(message)
     setMessage('')
   }
@@ -26,7 +26,7 @@ export default function Home() {
       body: JSON.stringify({ text: message })
     })
     const data = await response.json();
-      setMessages((prev) => [...prev, {id: crypto.randomUUID(), text: data.received, author: 'bot'}])
+      setMessages((prev) => [...prev, {id: crypto.randomUUID(), text: data.received, author: 'Bot'}])
   }
 
   async function retrain() {
@@ -45,7 +45,7 @@ export default function Home() {
     <main className="h-screen bg-gray-900 text-white flex flex-col">
         <h1 className="w-fit mx-auto">AI Chat</h1>
         <div className="flex-1 overflow-y-auto">
-          {messages.map((message) => <p key={message.id}>{message.text}</p>)}
+          {messages.map((message) => <p className='mb-1' key={message.id}>{message.author}: {message.text}</p>)}
           <div ref={bottomRef}/>
         </div>
         <form className="" onSubmit={(e) => handleSubmit(e)}>

@@ -36,9 +36,9 @@ def classify(message: Message):
 @app.post('/retrain')
 def retrain():
     global model, vectorizer
-    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(3, 5))
+    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
     X = vectorizer.fit_transform(texts)
-    model = MLPClassifier(hidden_layer_sizes=(64), max_iter=1000, verbose=True)
+    model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
     model.fit(X, labels)
     joblib.dump(model, 'model.pkl')
     joblib.dump(vectorizer, 'vectorizer.pkl')
