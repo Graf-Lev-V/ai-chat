@@ -16,10 +16,10 @@ export default function Home() {
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>): void {
     e.preventDefault() 
     setMessages([...messages, {id: crypto.randomUUID(), text: message, author: 'user'}])
-    sendMessage()
+    sendMessage(message)
     setMessage('')
   }
-  async function sendMessage() {
+  async function sendMessage(message: string) {
     const response = await fetch('http://localhost:8000/classify', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -27,6 +27,12 @@ export default function Home() {
     })
     const data = await response.json();
       setMessages((prev) => [...prev, {id: crypto.randomUUID(), text: data.received, author: 'bot'}])
+  }
+
+  async function retrain() {
+    await fetch('http://localhost:8000/retrain', {
+      method: 'POST'
+    })
   }
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -46,6 +52,7 @@ export default function Home() {
           <input value={message} onChange={(e) => setMessage(e.target.value)} className="border"></input>
           <button>Отправить</button>
         </form>
+        <button onClick={() => retrain()}>Переобучить</button>
     </main>
   );
 }

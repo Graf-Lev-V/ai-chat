@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 from fastapi.middleware.cors import CORSMiddleware
 import random
+import joblib
 
 app = FastAPI()
 
@@ -31,7 +32,8 @@ texts = [
     "асфальт",
     "123",
     "генератор",
-    "номер"
+    "номер",
+    'добрый папа'
 ]
 
 labels = [
@@ -51,6 +53,7 @@ labels = [
     0,
     0,
     0,
+    0,
     0
 ]
 
@@ -58,14 +61,6 @@ responses = {
     1: ["Привет!", "Здарова!", "Хай!"],
     0: ["Я не понимаю", "Что?"]
 }
-
-vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 4))
-X = vectorizer.fit_transform(texts)
-
-print(X.toarray())
-
-model = LogisticRegression()
-model.fit(X, labels)
 
 class Message(BaseModel):
     text: str
@@ -76,3 +71,13 @@ def classify(message: Message):
     return { 
         'received': random.choice(responses[response])
     }
+
+@app.post('/retrain')
+def retrain():
+    global model, vectorizer
+    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 4))
+    X = vectorizer.fit_transform(texts)
+    model = MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=1000, verbose=True)
+    model.fit(X, labels)
+    joblib.dump(model, 'model.pkl')
+    joblib.dump(vectorizer, 'vectorizer.pkl')
