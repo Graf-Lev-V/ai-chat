@@ -6,8 +6,28 @@ from fastapi.middleware.cors import CORSMiddleware
 import random
 import joblib
 from dataset import texts, labels
+import os
 
 app = FastAPI()
+
+def training():
+    global model, vectorizer
+    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
+    X = vectorizer.fit_transform(texts)
+    model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
+    model.fit(X, labels)
+    joblib.dump(model, 'model.pkl')
+    joblib.dump(vectorizer, 'vectorizer.pkl')
+
+def init_model():
+    global model, vectorizer
+    if os.path.exists('model.pkl') and os.path.exists('vectorizer.pkl'):
+        model = joblib.load('model.pkl')
+        vectorizer = joblib.load('vectorizer.pkl')
+    else:
+        training()
+
+init_model()
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,12 +53,7 @@ def classify(message: Message):
         'received': f'{random.choice(responses[response])} ({proba:.2f})'
     }
 
-@app.post('/retrain')
-def retrain():
-    global model, vectorizer
-    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
-    X = vectorizer.fit_transform(texts)
-    model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
-    model.fit(X, labels)
-    joblib.dump(model, 'model.pkl')
-    joblib.dump(vectorizer, 'vectorizer.pkl')
+@app.post('/training')
+def training_handler():
+    training()
+    return {'status': 'ok'}
