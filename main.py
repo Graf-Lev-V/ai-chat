@@ -5,15 +5,20 @@ from sklearn.neural_network import MLPClassifier
 from fastapi.middleware.cors import CORSMiddleware
 import random
 import joblib
-from dataset import texts, labels
 import os
+import json
 
 app = FastAPI()
 
 def training():
+    with open('dataset.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    greetings = data['1']
+    unknown = data['0']
+    labels = [1] * len(greetings) + [0] * len(unknown)
     global model, vectorizer
     vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
-    X = vectorizer.fit_transform(texts)
+    X = vectorizer.fit_transform(greetings + unknown)
     model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
     model.fit(X, labels)
     joblib.dump(model, 'model.pkl')
@@ -36,6 +41,11 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+classes = {
+    1: "Приветствие",
+    0: 'Без категории'
+}
+
 responses = {
     1: ["Привет!", "Здарова!", "Хай!"],
     0: ["Я не понимаю", "Что?"]
@@ -56,4 +66,22 @@ def classify(message: Message):
 @app.post('/training')
 def training_handler():
     training()
-    return {'status': 'ok'}
+    return
+
+@app.get('/classes')
+def get_classes():
+    return classes
+
+class Add(BaseModel):
+    text: str
+    label: int
+
+@app.post('/add')
+def add(add: Add):
+    with open('dataset.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    data[str(add.label)].append(add.text)
+    with open('dataset.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    training()
+    return
