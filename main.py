@@ -7,32 +7,33 @@ import random
 import joblib
 import os
 import json
+from contextlib import asynccontextmanager
+from fastapi import BackgroundTasks
 
-app = FastAPI()
-
-def training():
+def training(app: FastAPI):
     with open('dataset.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
     greetings = data['1']
     unknown = data['0']
     labels = [1] * len(greetings) + [0] * len(unknown)
-    global model, vectorizer
-    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
-    X = vectorizer.fit_transform(greetings + unknown)
-    model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
-    model.fit(X, labels)
-    joblib.dump(model, 'model.pkl')
-    joblib.dump(vectorizer, 'vectorizer.pkl')
+    app.state.vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
+    X = app.state.vectorizer.fit_transform(greetings + unknown)
+    app.state.model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
+    app.state.model.fit(X, labels)
+    joblib.dump(app.state.model, 'model.pkl')
+    joblib.dump(app.state.vectorizer, 'vectorizer.pkl')
 
-def init_model():
-    global model, vectorizer
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     if os.path.exists('model.pkl') and os.path.exists('vectorizer.pkl'):
-        model = joblib.load('model.pkl')
-        vectorizer = joblib.load('vectorizer.pkl')
+        app.state.model = joblib.load('model.pkl')
+        app.state.vectorizer = joblib.load('vectorizer.pkl')
     else:
-        training()
+        training(app)
 
-init_model()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,17 +57,17 @@ class Message(BaseModel):
 
 @app.post('/classify')
 def classify(message: Message):
-    X = vectorizer.transform([message.text])
-    response = int(model.predict(X)[0]) 
-    proba = max(model.predict_proba(X)[0])
+    X = app.state.vectorizer.transform([message.text])
+    response = int(app.state.model.predict(X)[0]) 
+    proba = max(app.state.model.predict_proba(X)[0])
     return { 
         'received': f'{random.choice(responses[response])} ({proba:.2f})'
     }
 
 @app.post('/training')
-def training_handler():
-    training()
-    return
+def training_handler(background_tasks: BackgroundTasks):
+    background_tasks.add_task(training, app)
+    return {'status': 'Training started'}
 
 @app.get('/classes')
 def get_classes():
@@ -80,10 +81,17 @@ class Add(BaseModel):
 def add(add: Add):
     with open('dataset.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
+
     for key in data: 
         if add.text in data[key]:
-            return
+            return {'error': 'Text already exists'}
+        
+    if str(add.label) not in data:
+        return {'error': 'Invalid label'}
+    
     data[str(add.label)].append(add.text)
+
     with open('dataset.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-    return
+        
+    return {'status': 'ok'}
