@@ -24,14 +24,14 @@ export default function Home() {
 
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>): void {
     e.preventDefault() 
-    setMessages([...messages, {id: crypto.randomUUID(), text: message, author: 'User'}])
+    setMessages((prev) => [...prev, {id: crypto.randomUUID(), text: message, author: 'User'}])
     sendMessage(message)
     setMessage('')
   }
   async function sendMessage(message: string) {
     setError(null)
     try {
-      const response = await fetch('http://localhost:8000/classify', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classify`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ text: message })
@@ -50,7 +50,7 @@ export default function Home() {
   async function training() {
     setError(null)
       try {
-          await fetch('http://localhost:8000/training', {
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/training`, {
           method: 'POST'
         })
       }
@@ -71,7 +71,7 @@ export default function Home() {
     (async () => {
       setError(null)
       try {
-        const response = await fetch('http://localhost:8000/classes', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`, {
           method: 'GET'
         })
         if (!response.ok) throw new Error('Error')
@@ -103,7 +103,7 @@ export default function Home() {
                 {message.author === 'User' && 
                 <button 
                   onClick={() => 
-                    { setMenu(message.id); setMenuActive(!menuActive) }} 
+                    { setMenu(message.id); setMenuActive((prev) => !prev) }} 
                   className='menu-btn hover: cursor-pointer border px-1 rounded-lg text-sm hidden group-hover:block'
                 >
                   learn
@@ -114,7 +114,7 @@ export default function Home() {
                     <li 
                       key={key} 
                       onClick={() => {
-                        fetch('http://localhost:8000/add', {
+                        fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
                           method: 'POST',
                           headers: {'Content-Type': 'application/json'},
                           body: JSON.stringify({text: message.text, label: key})
