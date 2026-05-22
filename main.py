@@ -30,7 +30,6 @@ async def lifespan(app: FastAPI):
         app.state.vectorizer = joblib.load('vectorizer.pkl')
     else:
         training(app)
-
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -81,17 +80,12 @@ class Add(BaseModel):
 def add(add: Add):
     with open('dataset.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-
     for key in data: 
         if add.text in data[key]:
             return {'error': 'Text already exists'}
-        
     if str(add.label) not in data:
         return {'error': 'Invalid label'}
-    
     data[str(add.label)].append(add.text)
-
     with open('dataset.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-        
     return {'status': 'ok'}
