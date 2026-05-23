@@ -94,16 +94,16 @@ export default function Home() {
 
   return (
     <main className="h-screen bg-gray-800 text-white flex flex-col">
-        <header className='bg-gray-900 border-b border-white/50 flex gap-4 p-4 justify-between'>
-          <h1 className="w-fit p-4 font-bold">AI Chat</h1>
-          <button onClick={() => training()} className='w-fit text-sm border border-white/50 rounded-lg p-4'>Переобучить</button>
+        <header className='bg-gray-900 border-b border-white/25 flex gap-4 p-4 justify-between items-center'>
+          <h1 className="w-fit font-bold px-2">AI Chat</h1>
+          <button onClick={() => training()} className='w-fit text-sm border border-white/25 rounded-lg p-4'>⟳ Переобучить</button>
         </header>
         <div className="flex-1 overflow-y-auto p-4">
           {messages.map((message) =>
               <div key={message.id} className=''>
               {message.author === 'User' && 
                 <div className='flex ml-auto flex-col items-end w-fit group gap-1'>
-                  <p className='bg-purple-600 rounded-2xl rounded-br-none p-2 w-fit'>{message.text}</p> 
+                  <p className='bg-purple-600 rounded-2xl rounded-br-sm p-2 w-fit'>{message.text}</p> 
                   <span className='relative hidden group-hover:block' onMouseLeave={() => setMenuActive(false)}>
                     <button 
                       className='menu-btn hover:cursor-pointer border p-2 rounded-lg text-sm w-fit mb-1'
@@ -135,15 +135,20 @@ export default function Home() {
                   </span>
                 </div> 
               }
-              {message.author === 'Bot' && <p className=''>{message.text}</p>}
+              {message.author === 'Bot' && <p className='bg-gray-600 w-fit p-2 rounded-2xl rounded-bl-sm'>{message.text}</p>}
               </div>
           )}
           {error && <p>{error.message}</p>}
           <div ref={bottomRef}/>
         </div>
-        <form className="" onSubmit={(e) => handleSubmit(e)}>
-          <input value={message} onChange={(e) => setMessage(e.target.value)} className="border" required></input>
-          <button>Отправить</button>
+        <form className="border-t border-white/25 p-4 flex gap-2" onSubmit={(e) => handleSubmit(e)}>
+          <input 
+            value={message} 
+            onChange={(e) => setMessage(e.target.value)} 
+            className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
+            placeholder='Введите сообщение...' 
+            required/>
+          <button className='p-2 px-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
         </form>
     </main>
   );
