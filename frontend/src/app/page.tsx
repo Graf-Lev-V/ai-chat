@@ -93,43 +93,50 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="h-screen bg-gray-900 text-white flex flex-col">
-        <h1 className="w-fit mx-auto">AI Chat</h1>
-        <div className="flex-1 overflow-y-auto">
+    <main className="h-screen bg-gray-800 text-white flex flex-col">
+        <header className='bg-gray-900 border-b border-white/50 flex gap-4 p-4'>
+          <h1 className="w-fit p-4">AI Chat</h1>
+          <button onClick={() => training()} className='w-fit text-sm border rounded-full p-4'>Переобучить</button>
+        </header>
+        <div className="flex-1 overflow-y-auto p-4">
           {messages.map((message) =>
-            <div key={message.id} className='flex gap-1 group w-fit'>
-              <p className='mb-1'>{message.author}: {message.text}</p>
-              <span className='relative invisible group-hover:visible' onMouseLeave={() => setMenuActive(false)}>
-                {message.author === 'User' && 
-                <button 
-                  onClick={() => 
-                    { setMenu(message.id); setMenuActive((prev) => !prev) }} 
-                  className='menu-btn hover: cursor-pointer border px-1 rounded-lg text-sm hidden group-hover:block'
-                >
-                  learn
-                </button>}
-                {menu === message.id && menuActive && 
-                  <ul className='absolute bg-gray-600 z-1 top-full menu-btn'>
-                    {classes && Object.entries(classes).reverse().map(([key, value]) => 
-                    <li 
-                      key={key} 
-                      onClick={() => {
-                        fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
-                          method: 'POST',
-                          headers: {'Content-Type': 'application/json'},
-                          body: JSON.stringify({text: message.text, label: key})
-                        })
-                        setMenuActive(false)
-                      }}
-                      className='hover:cursor-pointer w-max text-sm'
+              <div key={message.id} className=''>
+              {message.author === 'User' && 
+                <div className='flex ml-auto flex-col items-end w-fit group gap-1'>
+                  <p className='bg-purple-600 rounded-2xl rounded-br-none p-2 w-fit'>{message.text}</p> 
+                  <span className='relative hidden group-hover:block' onMouseLeave={() => setMenuActive(false)}>
+                    <button 
+                      className='menu-btn hover:cursor-pointer border p-2 rounded-lg text-sm w-fit mb-1'
+                      onClick={() => 
+                        { setMenu(message.id); setMenuActive((prev) => !prev) }} 
                     >
-                      {key}: {value}
-                    </li>
-                    )}
-                  </ul>
-                }
-              </span>
-            </div>
+                      Категория
+                    </button>
+                    {menu === message.id && menuActive && 
+                      <ul className='menu-btn flex gap-2 absolute top-full right-0'>
+                        {classes && Object.entries(classes).reverse().map(([key, value]) => 
+                          <li 
+                            key={key} 
+                            onClick={() => {
+                              fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({text: message.text, label: key})
+                              })
+                              setMenuActive(false)
+                            }}
+                            className='hover:cursor-pointer w-max text-sm bg-gray-900'
+                          >
+                            {key}: {value}
+                          </li>
+                        )}
+                      </ul>
+                    }
+                  </span>
+                </div> 
+              }
+              {message.author === 'Bot' && <p className='mb-1'>{message.text}</p>}
+              </div>
           )}
           {error && <p>{error.message}</p>}
           <div ref={bottomRef}/>
@@ -138,7 +145,6 @@ export default function Home() {
           <input value={message} onChange={(e) => setMessage(e.target.value)} className="border" required></input>
           <button>Отправить</button>
         </form>
-        <button onClick={() => training()} className='w-fit'>Переобучить</button>
     </main>
   );
 }
