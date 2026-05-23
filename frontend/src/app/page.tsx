@@ -94,9 +94,9 @@ export default function Home() {
 
   return (
     <main className="h-screen bg-gray-800 text-white flex flex-col">
-        <header className='bg-gray-900 border-b border-white/50 flex gap-4 p-4'>
-          <h1 className="w-fit p-4">AI Chat</h1>
-          <button onClick={() => training()} className='w-fit text-sm border rounded-full p-4'>Переобучить</button>
+        <header className='bg-gray-900 border-b border-white/50 flex gap-4 p-4 justify-between'>
+          <h1 className="w-fit p-4 font-bold">AI Chat</h1>
+          <button onClick={() => training()} className='w-fit text-sm border border-white/50 rounded-lg p-4'>Переобучить</button>
         </header>
         <div className="flex-1 overflow-y-auto p-4">
           {messages.map((message) =>
@@ -110,13 +110,14 @@ export default function Home() {
                       onClick={() => 
                         { setMenu(message.id); setMenuActive((prev) => !prev) }} 
                     >
-                      Категория
+                      › Категория
                     </button>
                     {menu === message.id && menuActive && 
-                      <ul className='menu-btn flex gap-2 absolute top-full right-0'>
+                      <ul className='menu-btn flex gap-1 absolute top-full right-0'>
                         {classes && Object.entries(classes).reverse().map(([key, value]) => 
                           <li 
                             key={key} 
+                            className='hover:cursor-pointer w-max text-xs bg-gray-900 p-1 border border-white/50 rounded-full'
                             onClick={() => {
                               fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
                                 method: 'POST',
@@ -125,7 +126,6 @@ export default function Home() {
                               })
                               setMenuActive(false)
                             }}
-                            className='hover:cursor-pointer w-max text-sm bg-gray-900'
                           >
                             {key}: {value}
                           </li>
@@ -135,7 +135,7 @@ export default function Home() {
                   </span>
                 </div> 
               }
-              {message.author === 'Bot' && <p className='mb-1'>{message.text}</p>}
+              {message.author === 'Bot' && <p className=''>{message.text}</p>}
               </div>
           )}
           {error && <p>{error.message}</p>}
