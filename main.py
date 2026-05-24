@@ -100,3 +100,23 @@ def add(add: Add):
     with open('dataset.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     return {'status': 'ok'}
+
+@app.get('/stats')
+def stats():
+    with open('dataset.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    counts = {}
+    for key in data:
+        counts[key] = len(data[key])
+    all_texts = []
+    all_labels = []
+    for key, texts in data.items():
+        for text in texts:
+            all_texts.append(text)
+            all_labels.append(int(key))
+    X = app.state.vectorizer.transform(all_texts)
+    return {
+        'counts': counts,
+        'accuracy': round(app.state.model.score(X, all_labels) * 100, 1)
+    }
+

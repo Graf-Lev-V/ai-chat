@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 
 type Message = {
   id: string,
@@ -10,18 +11,13 @@ type Message = {
   author: string
 }
 
-type Classes = {
-  1: string,
-  0: string
-}
-
 export default function Home() {
 
   const [message, setMessage] = useState<string>('')
   const [messages, setMessages] = useState<Message[]>([])
   const [error, setError] = useState<Error | null>(null)
   const [menu, setMenu] = useState<string>('')
-  const [classes, setClasses] = useState<Classes | null>(null)
+  const [classes, setClasses] = useState<{[key: string]: string} | null>(null)
   const [menuActive, setMenuActive] = useState<boolean>(false)
 
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>): void {
@@ -96,9 +92,10 @@ export default function Home() {
 
   return (
     <main className="h-screen bg-gray-800 text-white flex flex-col">
-        <header className='bg-gray-900 border-b border-white/25 flex gap-4 p-4 justify-between items-center'>
+        <header className='bg-gray-900 border-b border-white/25 flex gap-4 p-4 items-center'>
           <h1 className="w-fit font-bold px-2">AI Chat</h1>
-          <button onClick={() => training()} className='w-fit text-sm border border-white/25 rounded-lg p-4'>⟳ Переобучить</button>
+          <Link href='/stats'>Stats</Link>
+          <button onClick={() => training()} className='w-fit text-sm border border-white/25 rounded-lg p-4 ml-auto'>⟳ Переобучить</button>
         </header>
         <div className="flex-1 overflow-y-auto p-4">
           {messages.map((message) =>
@@ -121,11 +118,21 @@ export default function Home() {
                             key={key} 
                             className='hover:cursor-pointer w-max text-xs text-white/50 bg-gray-900 p-1 rounded-full'
                             onClick={() => {
-                              fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({text: message.text, label: key})
-                              })
+                              (async () => {
+                                try {
+                                  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({text: message.text, label: key})
+                                  })
+                                  if (!response.ok) throw new Error('Error')
+                                }
+                                catch (error) {
+                                  if (error instanceof Error) {
+                                    setError(error)
+                                  }
+                                }
+                              })()
                               setMenuActive(false)
                             }}
                           >
@@ -154,7 +161,7 @@ export default function Home() {
             className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
             placeholder='Введите сообщение...' 
             required/>
-          <button className='px-3 py-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
+          <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
         </form>
     </main>
   );
