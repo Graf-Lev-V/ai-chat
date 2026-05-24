@@ -115,7 +115,7 @@ export default function Home() {
                       › Категория
                     </button>
                     {menu === message.id && menuActive && 
-                      <ul className='menu-btn flex flex-col gap-1 items-end' onMouseLeave={() => setMenuActive(false)}>
+                      <ul className='menu-btn flex flex-col items-end gap-1 z-1' onMouseLeave={() => setMenuActive(false)}>
                         {classes && Object.entries(classes).reverse().map(([key, value]) => 
                           <li 
                             key={key} 

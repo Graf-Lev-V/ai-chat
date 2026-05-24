@@ -13,13 +13,16 @@ from fastapi import BackgroundTasks
 def training(app: FastAPI):
     with open('dataset.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-    greetings = data['1']
-    unknown = data['0']
-    labels = [1] * len(greetings) + [0] * len(unknown)
+    all_texts = []
+    all_labels = []
+    for key, texts in data.items():
+        for text in texts:
+            all_texts.append(text)
+            all_labels.append(int(key))
     app.state.vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
-    X = app.state.vectorizer.fit_transform(greetings + unknown)
+    X = app.state.vectorizer.fit_transform(all_texts)
     app.state.model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
-    app.state.model.fit(X, labels)
+    app.state.model.fit(X, all_labels)
     joblib.dump(app.state.model, 'model.pkl')
     joblib.dump(app.state.vectorizer, 'vectorizer.pkl')
 
@@ -43,11 +46,17 @@ app.add_middleware(
 
 classes = {
     1: "Приветствие",
+    2: "Прощание",
+    3: "Благодарность",
+    4: "Вопрос",
     0: 'Без категории'
 }
 
 responses = {
     1: ["Привет!", "Здарова!", "Хай!"],
+    2: ["Пока!", "До свидания!", "Удачи!"],
+    3: ["Пожалуйста!", "Не за что!", "Всегда рад!"],
+    4: ["Хороший вопрос!", "Не знаю", "Затрудняюсь ответить"],
     0: ["Я не понимаю", "Что?"]
 }
 
