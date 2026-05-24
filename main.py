@@ -36,7 +36,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000'],
+    allow_origins=[os.getenv('FRONTEND_URL', 'http://localhost:3000')],
     allow_methods=['*'],
     allow_headers=['*']
 )
@@ -60,7 +60,9 @@ def classify(message: Message):
     response = int(app.state.model.predict(X)[0]) 
     proba = max(app.state.model.predict_proba(X)[0])
     return { 
-        'received': f'{random.choice(responses[response])} ({proba:.2f})'
+        'text': random.choice(responses[response]),
+        'proba': round(proba, 2),
+        'class': classes[response]
     }
 
 @app.post('/training')

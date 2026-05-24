@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 type Message = {
   id: string,
   text: string,
+  proba?: number,
+  class?: string,
   author: string
 }
 
@@ -38,7 +40,7 @@ export default function Home() {
       })
       if (!response.ok) throw new Error('Error')
       const data = await response.json()
-        setMessages((prev) => [...prev, {id: crypto.randomUUID(), text: data.received, author: 'Bot'}])
+        setMessages((prev) => [...prev, {id: crypto.randomUUID(), text: data.text, proba: data.proba, class: data.class, author: 'Bot'}])
     }
     catch (error) {
       if (error instanceof Error) {
@@ -100,24 +102,24 @@ export default function Home() {
         </header>
         <div className="flex-1 overflow-y-auto p-4">
           {messages.map((message) =>
-              <div key={message.id} className=''>
+              <div key={message.id} className='mb-3'>
               {message.author === 'User' && 
-                <div className='flex ml-auto flex-col items-end w-fit group gap-1'>
-                  <p className='bg-purple-600 rounded-2xl rounded-br-sm p-2 w-fit'>{message.text}</p> 
-                  <span className='relative hidden group-hover:block' onMouseLeave={() => setMenuActive(false)}>
+                <div className='relative flex ml-auto flex-col items-end w-fit group gap-1 '>
+                  <p className='bg-purple-600 rounded-2xl rounded-br-sm p-2 w-fit mb-1'>{message.text}</p> 
+                  <span className='hidden group-hover:flex flex-col items-end absolute top-full right-0' onMouseLeave={() => setMenuActive(false)}>
                     <button 
-                      className='menu-btn hover:cursor-pointer border p-2 rounded-lg text-sm w-fit mb-1'
+                      className='menu-btn hover:cursor-pointer border px-3 py-2 rounded-lg text-sm w-max mb-1 border-white/25'
                       onClick={() => 
                         { setMenu(message.id); setMenuActive((prev) => !prev) }} 
                     >
                       › Категория
                     </button>
                     {menu === message.id && menuActive && 
-                      <ul className='menu-btn flex gap-1 absolute top-full right-0'>
+                      <ul className='menu-btn flex flex-col gap-1 items-end' onMouseLeave={() => setMenuActive(false)}>
                         {classes && Object.entries(classes).reverse().map(([key, value]) => 
                           <li 
                             key={key} 
-                            className='hover:cursor-pointer w-max text-xs bg-gray-900 p-1 border border-white/50 rounded-full'
+                            className='hover:cursor-pointer w-max text-xs text-white/50 bg-gray-900 p-1 rounded-full'
                             onClick={() => {
                               fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
                                 method: 'POST',
@@ -135,7 +137,11 @@ export default function Home() {
                   </span>
                 </div> 
               }
-              {message.author === 'Bot' && <p className='bg-gray-600 w-fit p-2 rounded-2xl rounded-bl-sm'>{message.text}</p>}
+              {message.author === 'Bot' && 
+              <p className='bg-gray-600 w-fit p-2 rounded-2xl rounded-bl-sm flex flex-col gap-1'>
+                <span>{message.text}</span>
+                <span className='text-xs text-white/50'>{message.class} · {message.proba}</span>
+              </p>}
               </div>
           )}
           {error && <p>{error.message}</p>}
@@ -148,7 +154,7 @@ export default function Home() {
             className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
             placeholder='Введите сообщение...' 
             required/>
-          <button className='p-2 px-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
+          <button className='px-3 py-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
         </form>
     </main>
   );
