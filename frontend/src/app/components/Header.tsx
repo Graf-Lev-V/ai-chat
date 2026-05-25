@@ -23,7 +23,7 @@ export default function Header() {
     
     return (
         <header className='bg-gray-900 border-b border-white/25 flex gap-4 p-4 items-center text-white'>
-            <h1 className="w-fit font-bold px-2">AI Chat</h1>
+            <Link href='/' className="w-fit font-bold px-2">AI Chat</Link>
             <Link href='/stats'>Stats</Link>
             {error && <p>{error.message}</p>}
             <button onClick={() => training()} className='w-fit text-sm border border-white/25 rounded-lg p-4 ml-auto'>⟳ Переобучить</button>
