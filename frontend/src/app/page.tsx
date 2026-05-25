@@ -45,20 +45,6 @@ export default function Home() {
     }
   }
 
-  async function training() {
-    setError(null)
-      try {
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/training`, {
-          method: 'POST'
-        })
-      }
-      catch (error) {
-        if (error instanceof Error) {
-          setError(error)
-        }
-      }
-  }
-
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,78 +77,73 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="h-screen bg-gray-800 text-white flex flex-col">
-        <header className='bg-gray-900 border-b border-white/25 flex gap-4 p-4 items-center'>
-          <h1 className="w-fit font-bold px-2">AI Chat</h1>
-          <Link href='/stats'>Stats</Link>
-          <button onClick={() => training()} className='w-fit text-sm border border-white/25 rounded-lg p-4 ml-auto'>⟳ Переобучить</button>
-        </header>
-        <div className="flex-1 overflow-y-auto p-4">
-          {messages.map((message) =>
-              <div key={message.id} className='mb-3'>
-              {message.author === 'User' && 
-                <div className='relative flex ml-auto flex-col items-end w-fit group gap-1 '>
-                  <p className='bg-purple-600 rounded-2xl rounded-br-sm p-2 w-fit mb-1'>{message.text}</p> 
-                  <span className='hidden group-hover:flex flex-col items-end absolute top-full right-0' onMouseLeave={() => setMenuActive(false)}>
-                    <button 
-                      className='menu-btn hover:cursor-pointer border px-3 py-2 rounded-lg text-sm w-max mb-1 border-white/25'
-                      onClick={() => 
-                        { setMenu(message.id); setMenuActive((prev) => !prev) }} 
-                    >
-                      › Категория
-                    </button>
-                    {menu === message.id && menuActive && 
-                      <ul className='menu-btn flex flex-col items-end gap-1 z-1' onMouseLeave={() => setMenuActive(false)}>
-                        {classes && Object.entries(classes).reverse().map(([key, value]) => 
-                          <li 
-                            key={key} 
-                            className='hover:cursor-pointer w-max text-xs text-white/50 bg-gray-900 p-1 rounded-full'
-                            onClick={() => {
-                              (async () => {
-                                try {
-                                  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
-                                    method: 'POST',
-                                    headers: {'Content-Type': 'application/json'},
-                                    body: JSON.stringify({text: message.text, label: key})
-                                  })
-                                  if (!response.ok) throw new Error('Error')
+    <main className="flex-1 min-h-0 bg-gray-800 text-white flex flex-col">
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages.map((message) =>
+            <div key={message.id} className='mb-3'>
+            {message.author === 'User' && 
+              <div className='relative flex ml-auto flex-col items-end w-fit group gap-1 '>
+                <p className='bg-purple-600 rounded-2xl rounded-br-sm p-2 w-fit mb-1'>{message.text}</p> 
+                <span className='hidden group-hover:flex flex-col items-end absolute top-full right-0' onMouseLeave={() => setMenuActive(false)}>
+                  <button 
+                    className='menu-btn hover:cursor-pointer border px-3 py-2 rounded-lg text-sm w-max mb-1 border-white/25'
+                    onClick={() => 
+                      { setMenu(message.id); setMenuActive((prev) => !prev) }} 
+                  >
+                    › Категория
+                  </button>
+                  {menu === message.id && menuActive && 
+                    <ul className='menu-btn flex flex-col items-end gap-1 z-1' onMouseLeave={() => setMenuActive(false)}>
+                      {classes && Object.entries(classes).reverse().map(([key, value]) => 
+                        <li 
+                          key={key} 
+                          className='hover:cursor-pointer w-max text-xs text-white/50 bg-gray-900 p-1 rounded-full'
+                          onClick={() => {
+                            (async () => {
+                              try {
+                                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add`, {
+                                  method: 'POST',
+                                  headers: {'Content-Type': 'application/json'},
+                                  body: JSON.stringify({text: message.text, label: key})
+                                })
+                                if (!response.ok) throw new Error('Error')
+                              }
+                              catch (error) {
+                                if (error instanceof Error) {
+                                  setError(error)
                                 }
-                                catch (error) {
-                                  if (error instanceof Error) {
-                                    setError(error)
-                                  }
-                                }
-                              })()
-                              setMenuActive(false)
-                            }}
-                          >
-                            {key}: {value}
-                          </li>
-                        )}
-                      </ul>
-                    }
-                  </span>
-                </div> 
-              }
-              {message.author === 'Bot' && 
-              <p className='bg-gray-600 w-fit p-2 rounded-2xl rounded-bl-sm flex flex-col gap-1'>
-                <span>{message.text}</span>
-                <span className='text-xs text-white/50'>{message.class} · {message.proba}</span>
-              </p>}
-              </div>
-          )}
-          {error && <p>{error.message}</p>}
-          <div ref={bottomRef}/>
-        </div>
-        <form className="border-t border-white/25 p-4 flex gap-2" onSubmit={(e) => handleSubmit(e)}>
-          <input 
-            value={message} 
-            onChange={(e) => setMessage(e.target.value)} 
-            className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
-            placeholder='Введите сообщение...' 
-            required/>
-          <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
-        </form>
+                              }
+                            })()
+                            setMenuActive(false)
+                          }}
+                        >
+                          {key}: {value}
+                        </li>
+                      )}
+                    </ul>
+                  }
+                </span>
+              </div> 
+            }
+            {message.author === 'Bot' && 
+            <p className='bg-gray-600 w-fit p-2 rounded-2xl rounded-bl-sm flex flex-col gap-1'>
+              <span>{message.text}</span>
+              <span className='text-xs text-white/50'>{message.class} · {message.proba}</span>
+            </p>}
+            </div>
+        )}
+        {error && <p>{error.message}</p>}
+        <div ref={bottomRef}/>
+      </div>
+      <form className="border-t border-white/25 p-4 flex gap-2" onSubmit={(e) => handleSubmit(e)}>
+        <input 
+          value={message} 
+          onChange={(e) => setMessage(e.target.value)} 
+          className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
+          placeholder='Введите сообщение...' 
+          required/>
+        <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
+      </form>
     </main>
   );
 }

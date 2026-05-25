@@ -43,7 +43,7 @@ export default function Stats() {
         <div className="bg-gray-800 h-screen text-white flex flex-col items-center p-4">
             {error && <p>{error.message}</p>}
             <h2 className="font-bold text-xl p-4">Статистика</h2>
-            <ul className="flex flex-col justify-between">
+            <ul className="flex flex-col justify-between flex-1">
                 {data && classes && Object.entries(data.counts).map(([key, value]) => 
                     <li key={key} className="">{classes[key]}: {value}</li>
                 )}
