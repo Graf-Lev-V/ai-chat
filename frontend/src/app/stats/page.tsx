@@ -39,16 +39,22 @@ export default function Stats() {
         })()
     }, [])
 
+    const all = data ? Object.values(data.counts).reduce((all, count) => all + count) : 0
+
     return (
         <div className="bg-gray-800 h-screen text-white flex flex-col items-center p-4">
             {error && <p>{error.message}</p>}
             <h2 className="font-bold text-xl p-4">Статистика</h2>
-            <ul className="flex flex-col justify-between flex-1">
+            {data && <p className="text-5xl">Точность: {data.accuracy}% Всего:{all}</p>}
+            <ul className="grid grid-cols-3 gap-4 flex-1">
                 {data && classes && Object.entries(data.counts).map(([key, value]) => 
-                    <li key={key} className="">{classes[key]}: {value}</li>
+                    <li key={key} className="p-4 bg-gray-600 rounded-md">
+                        <p className="text-sm">{classes[key]}</p>
+                        <p className="text-xl">{value}</p>
+                        <p>{Math.floor(value / (all / 100))}%</p>
+                    </li>
                 )}
-            </ul>
-            {data && <p>Точность: {data.accuracy}%</p>}
+            </ul>            
         </div>
     )
 }
