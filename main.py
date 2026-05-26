@@ -31,9 +31,11 @@ def training(app: FastAPI):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if os.path.exists('model.pkl') and os.path.exists('vectorizer.pkl'):
+    if os.path.exists('model.pkl') and os.path.exists('vectorizer.pkl') and os.path.exists('texts_test.pkl') and os.path.exists('labels_test.pkl'):
         app.state.model = joblib.load('model.pkl')
         app.state.vectorizer = joblib.load('vectorizer.pkl')
+        app.state.texts_test = joblib.load('texts_test.pkl')
+        app.state.labels_test = joblib.load('labels_test.pkl')
     else:
         training(app)
     yield
@@ -111,11 +113,9 @@ def stats():
     counts = {}
     for key in data:
         counts[key] = len(data[key])
-    texts_test = joblib.load('texts_test.pkl')
-    labels_test = joblib.load('labels_test.pkl')
-    X = app.state.vectorizer.transform(texts_test)
+    X = app.state.vectorizer.transform(app.state.texts_test)
     return {
         'counts': counts,
-        'accuracy': round(app.state.model.score(X, labels_test) * 100, 1)
+        'accuracy': round(app.state.model.score(X, app.state.labels_test) * 100, 1)
     }
 
