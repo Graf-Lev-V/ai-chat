@@ -137,7 +137,7 @@ export default function Home() {
             </div>
         )}
         {loading && <p className='bg-gray-600 w-fit p-2 rounded-2xl rounded-bl-sm'>...</p>}
-        {error && <p>{error.message}</p>}
+        {error && <p className='bg-red-500/20 border border-red-500 text-white rounded-md px-3 py-2 text-sm'>{error.message}</p>}
         <div ref={bottomRef}/>
       </div>
       <form className="border-t border-white/25 p-4 flex gap-2" onSubmit={(e) => handleSubmit(e)}>

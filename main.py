@@ -8,7 +8,7 @@ import joblib
 import os
 import json
 from contextlib import asynccontextmanager
-from fastapi import BackgroundTasks
+from sklearn.model_selection import train_test_split
 
 def training(app: FastAPI):
     with open('dataset.json', 'r', encoding='utf-8') as f:
@@ -19,12 +19,15 @@ def training(app: FastAPI):
         for text in texts:
             all_texts.append(text)
             all_labels.append(int(key))
+    texts_train, texts_test, labels_train, labels_test = train_test_split(all_texts, all_labels, test_size=0.2, random_state=42)
     app.state.vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
-    X = app.state.vectorizer.fit_transform(all_texts)
+    X = app.state.vectorizer.fit_transform(texts_train)
     app.state.model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
-    app.state.model.fit(X, all_labels)
+    app.state.model.fit(X, labels_train)
     joblib.dump(app.state.model, 'model.pkl')
     joblib.dump(app.state.vectorizer, 'vectorizer.pkl')
+    joblib.dump(texts_test, 'texts_test.pkl')
+    joblib.dump(labels_test, 'labels_test.pkl')
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -75,8 +78,8 @@ def classify(message: Message):
     }
 
 @app.post('/training')
-def training_handler(background_tasks: BackgroundTasks):
-    background_tasks.add_task(training, app)
+def training_handler():
+    training(app)
     return {'status': 'Training started'}
 
 @app.get('/classes')
@@ -108,15 +111,11 @@ def stats():
     counts = {}
     for key in data:
         counts[key] = len(data[key])
-    all_texts = []
-    all_labels = []
-    for key, texts in data.items():
-        for text in texts:
-            all_texts.append(text)
-            all_labels.append(int(key))
-    X = app.state.vectorizer.transform(all_texts)
+    texts_test = joblib.load('texts_test.pkl')
+    labels_test = joblib.load('labels_test.pkl')
+    X = app.state.vectorizer.transform(texts_test)
     return {
         'counts': counts,
-        'accuracy': round(app.state.model.score(X, all_labels) * 100, 1)
+        'accuracy': round(app.state.model.score(X, labels_test) * 100, 1)
     }
 

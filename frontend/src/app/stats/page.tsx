@@ -43,7 +43,7 @@ export default function Stats() {
 
     return (
         <main className="bg-gray-800 flex-1 text-white flex flex-col items-center p-4 overflow-y-auto">
-            {error && <p>{error.message}</p>}
+            {error && <p className="bg-red-500/20 border border-red-500 text-white rounded-md px-3 py-2 text-sm">{error.message}</p>}
             <h2 className="font-bold text-xl p-4">Статистика</h2>
             {data && <div className="flex gap-4 p-4">
                 <p className="bg-gray-700 p-4 rounded-md flex flex-col">
