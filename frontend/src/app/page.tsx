@@ -15,6 +15,7 @@ export default function Home() {
   const [message, setMessage] = useState<string>('')
   const [messages, setMessages] = useState<Message[]>([])
   const [error, setError] = useState<Error | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
   const [menu, setMenu] = useState<string>('')
   const [classes, setClasses] = useState<{[key: string]: string} | null>(null)
   const [menuActive, setMenuActive] = useState<boolean>(false)
@@ -27,11 +28,12 @@ export default function Home() {
   }
   async function sendMessage(message: string) {
     setError(null)
+    setLoading(true)
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classify`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ text: message })
+        body: JSON.stringify({ text: message }),
       })
       if (!response.ok) throw new Error('Error')
       const data = await response.json()
@@ -41,6 +43,9 @@ export default function Home() {
       if (error instanceof Error) {
         setError(error)
       }
+    }
+    finally {
+      setLoading(false)
     }
   }
 
@@ -131,6 +136,7 @@ export default function Home() {
             </p>}
             </div>
         )}
+        {loading && <p className='bg-gray-600 w-fit p-2 rounded-2xl rounded-bl-sm'>...</p>}
         {error && <p>{error.message}</p>}
         <div ref={bottomRef}/>
       </div>
@@ -140,8 +146,9 @@ export default function Home() {
           onChange={(e) => setMessage(e.target.value)} 
           className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
           placeholder='Введите сообщение...' 
-          required/>
-        <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer'>↑</button>
+          required
+          disabled={loading}/>
+        <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer' disabled={loading}>↑</button>
       </form>
     </main>
   );
