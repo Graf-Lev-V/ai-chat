@@ -22,6 +22,7 @@ export default function Home() {
 
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>): void {
     e.preventDefault() 
+    if (loading) return
     setMessages((prev) => [...prev, {id: crypto.randomUUID(), text: message, author: 'User'}])
     sendMessage(message)
     setMessage('')
@@ -147,7 +148,7 @@ export default function Home() {
           className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
           placeholder='Enter your message...' 
           required
-          disabled={loading}/>
+        />
         <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer' disabled={loading}>↑</button>
       </form>
     </main>

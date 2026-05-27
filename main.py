@@ -65,6 +65,7 @@ responses = {
     0: ["I don't understand", "What?"]
 }
 
+
 class Message(BaseModel):
     text: str
 

@@ -2,3 +2,5 @@
 __pycache__
 model.pkl
 vectorizer.pkl
+texts_test.pkl
+labels_test.pkl
