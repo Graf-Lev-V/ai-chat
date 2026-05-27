@@ -35,7 +35,7 @@ export default function Header() {
             onClick={() => training()} 
             className='w-fit text-sm border border-white/25 rounded-lg p-4 ml-auto hover:cursor-pointer' 
             disabled={loading}
-            >⟳ {loading ? 'Обучение' : "Переобучить"}</button>
+            >⟳ {loading ? 'Training' : "Retrain"}</button>
         </header>
     )
 }

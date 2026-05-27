@@ -50,19 +50,19 @@ app.add_middleware(
 )
 
 classes = {
-    1: "Приветствие",
-    2: "Прощание",
-    3: "Благодарность",
-    4: "Вопрос",
-    0: 'Без категории'
+    1: "Greeting",
+    2: "Farewell",
+    3: "Gratitude",
+    4: "Question",
+    0: "No category"
 }
 
 responses = {
-    1: ["Привет!", "Здарова!", "Хай!"],
-    2: ["Пока!", "До свидания!", "Удачи!"],
-    3: ["Пожалуйста!", "Не за что!", "Всегда рад!"],
-    4: ["Хороший вопрос!", "Не знаю", "Затрудняюсь ответить"],
-    0: ["Я не понимаю", "Что?"]
+    1: ["Hello!", "Hey!", "Hi!"],
+    2: ["Bye!", "Goodbye!", "Good luck!"],
+    3: ["You're welcome!", "No problem!", "Always glad!"],
+    4: ["Good question!", "I don't know", "I'm stumped"],
+    0: ["I don't understand", "What?"]
 }
 
 class Message(BaseModel):
