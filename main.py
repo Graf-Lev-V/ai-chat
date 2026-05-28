@@ -24,6 +24,8 @@ def training(app: FastAPI):
     X = app.state.vectorizer.fit_transform(texts_train)
     app.state.model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
     app.state.model.fit(X, labels_train)
+    app.state.texts_test = texts_test
+    app.state.labels_test = labels_test
     joblib.dump(app.state.model, 'model.pkl')
     joblib.dump(app.state.vectorizer, 'vectorizer.pkl')
     joblib.dump(texts_test, 'texts_test.pkl')
@@ -31,7 +33,13 @@ def training(app: FastAPI):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    training(app)
+    if os.path.exists('model.pkl') and os.path.exists('vectorizer.pkl') and os.path.exists('texts_test.pkl') and os.path.exists('labels_test.pkl'):
+        app.state.model = joblib.load('model.pkl')
+        app.state.vectorizer = joblib.load('vectorizer.pkl')
+        app.state.texts_test = joblib.load('texts_test.pkl')
+        app.state.labels_test = joblib.load('labels_test.pkl')
+    else:
+        training(app)
     yield
 
 app = FastAPI(lifespan=lifespan)
