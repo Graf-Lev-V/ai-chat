@@ -31,13 +31,7 @@ def training(app: FastAPI):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if os.path.exists('model.pkl') and os.path.exists('vectorizer.pkl') and os.path.exists('texts_test.pkl') and os.path.exists('labels_test.pkl'):
-        app.state.model = joblib.load('model.pkl')
-        app.state.vectorizer = joblib.load('vectorizer.pkl')
-        app.state.texts_test = joblib.load('texts_test.pkl')
-        app.state.labels_test = joblib.load('labels_test.pkl')
-    else:
-        training(app)
+    training(app)
     yield
 
 app = FastAPI(lifespan=lifespan)

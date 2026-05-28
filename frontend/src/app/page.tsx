@@ -16,6 +16,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
+  const [initialLoading, setInitialLoading] = useState<boolean>(false)
   const [menu, setMenu] = useState<string>('')
   const [classes, setClasses] = useState<{[key: string]: string} | null>(null)
   const [menuActive, setMenuActive] = useState<boolean>(false)
@@ -61,7 +62,7 @@ export default function Home() {
     const controller = new AbortController();
     (async () => {
       setError(null)
-      setLoading(true)
+      setInitialLoading(true)
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`, {
           method: 'GET',
@@ -78,7 +79,7 @@ export default function Home() {
       }
       finally {
         if (!controller.signal.aborted)
-          setLoading(false)
+          setInitialLoading(false)
       }
     })()
     return () => controller.abort()
