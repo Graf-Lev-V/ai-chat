@@ -12,19 +12,24 @@ export default function Stats() {
     const [stats, setStats] = useState<Stats | null>(null)
     const [classes, setClasses] = useState<{[key: string]: string} | null>(null)
     const [error, setError] = useState<Error | null>(null)
+    const [loading, setLoading] = useState<boolean>(false)
 
     useEffect(() => {
+        const controller = new AbortController();
         (async () => {
             setStats(null)
             setClasses(null)
             setError(null)
+            setLoading(true)
             try {
                 const [statsRes, classesRes] = await Promise.all([
                     fetch(`${process.env.NEXT_PUBLIC_API_URL}/stats`, {
-                        method: 'GET'
+                        method: 'GET',
+                        signal: controller.signal
                     }),
                     fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`, {
-                        method: 'GET'
+                        method: 'GET',
+                        signal: controller.signal
                     })
                 ])
                 if (!statsRes.ok || !classesRes.ok) throw new Error('Error')
@@ -34,19 +39,25 @@ export default function Stats() {
                 setClasses(classes)
             }
             catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof Error && error.name !== 'AbortError') {
                     setError(error)
                 }
             }
+            finally {
+                if (!controller.signal.aborted)
+                    setLoading(false)
+            }
         })()
+        return () => controller.abort()
     }, [])
 
     const all = stats ? Object.values(stats.counts).reduce((all, count) => all + count) : 0
 
     return (
         <main className="bg-gray-800 flex-1 text-white flex flex-col items-center p-4 overflow-y-auto">
-            {error && <p className="bg-red-500/20 border border-red-500 text-white rounded-md px-3 py-2 text-sm">{error.message}</p>}
             <h2 className="font-bold text-xl p-4">Statistics</h2>
+            {error && <p className="bg-red-500/20 border border-red-500 text-white rounded-md px-3 py-2 text-sm">{error.message}</p>}
+            {loading && <p>Loading...</p>}
             {stats && <div className="flex gap-4 p-4">
                 <p className="bg-gray-700 p-4 rounded-md flex flex-col">
                     <span className="text-sm text-gray-200">Accuracy:</span>

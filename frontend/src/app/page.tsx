@@ -27,6 +27,7 @@ export default function Home() {
     sendMessage(message)
     setMessage('')
   }
+
   async function sendMessage(message: string) {
     setError(null)
     setLoading(true)
@@ -57,28 +58,30 @@ export default function Home() {
   }, [messages])
 
   useEffect(() => {
+    const controller = new AbortController();
     (async () => {
       setError(null)
+      setLoading(true)
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`, {
-          method: 'GET'
+          method: 'GET',
+          signal: controller.signal
         })
         if (!response.ok) throw new Error('Error')
         const data = await response.json()
         setClasses(data)
       }
       catch (error) {
-        if (error instanceof Error) {
+        if (error instanceof Error && error.name !== 'AbortError') {
           setError(error)
         }
       }
+      finally {
+        if (!controller.signal.aborted)
+          setLoading(false)
+      }
     })()
-  }, [])
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {if (e.target instanceof HTMLElement && e.target.closest('.menu-btn')) return; setMenuActive(false)}
-    document.addEventListener('click', handler)
-    return () => document.removeEventListener('click', handler)
+    return () => controller.abort()
   }, [])
 
   return (
@@ -91,14 +94,14 @@ export default function Home() {
                 <p className='bg-purple-600 rounded-2xl rounded-br-sm p-2 w-fit mb-1'>{message.text}</p> 
                 <span className='hidden group-hover:flex flex-col items-end absolute top-full right-0' onMouseLeave={() => setMenuActive(false)}>
                   <button 
-                    className='menu-btn hover:cursor-pointer border px-3 py-2 rounded-lg text-sm w-max mb-1 border-white/25'
+                    className='hover:cursor-pointer border px-3 py-2 rounded-lg text-sm w-max mb-1 border-white/25'
                     onClick={() => 
                       { setMenu(message.id); setMenuActive((prev) => !prev) }} 
                   >
                     › Категория
                   </button>
                   {menu === message.id && menuActive && 
-                    <ul className='menu-btn flex flex-col items-end gap-1 z-1' onMouseLeave={() => setMenuActive(false)}>
+                    <ul className='flex flex-col items-end gap-1 z-1' onMouseLeave={() => setMenuActive(false)}>
                       {classes && Object.entries(classes).reverse().map(([key, value]) => 
                         <li 
                           key={key} 
@@ -145,11 +148,11 @@ export default function Home() {
         <input 
           value={message} 
           onChange={(e) => setMessage(e.target.value)} 
-          className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5"
+          className="border border-white/25 bg-neutral-800 flex-1 rounded-md p-1.5 pl-3"
           placeholder='Enter your message...' 
           required
         />
-        <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer' disabled={loading}>↑</button>
+        <button className='px-4 py-2 border border-white/25 rounded-md hover:cursor-pointer' disabled={loading}>Send</button>
       </form>
     </main>
   );
