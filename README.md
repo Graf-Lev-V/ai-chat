@@ -22,6 +22,7 @@ A full-stack AI chat application that classifies user messages into intents usin
 - Statistics page with model accuracy and dataset breakdown per intent
 - Model retraining via UI button without redeployment
 - Train/test split for honest accuracy evaluation
+  
 ![Stats Page](screenshots/stats.png)
  
 ## Getting Started
