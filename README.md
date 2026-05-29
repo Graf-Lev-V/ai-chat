@@ -13,6 +13,7 @@ A full-stack AI chat application that classifies user messages into intents usin
 - Tailwind CSS
 - FastAPI
 - scikit-learn (TF-IDF + MLPClassifier)
+  
 ## Features
  
 - Real-time message classification into intents (greeting, farewell, gratitude, question)
@@ -28,7 +29,6 @@ A full-stack AI chat application that classifies user messages into intents usin
 ### Backend
  
 ```
-cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
@@ -52,7 +52,3 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 FRONTEND_URL=http://localhost:3000
 ```
- 
-## About
- 
-Full-stack AI chat app with intent classification built with Next.js, FastAPI and scikit-learn.
