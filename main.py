@@ -9,7 +9,8 @@ import os
 import json
 from contextlib import asynccontextmanager
 from sklearn.model_selection import train_test_split
-from fastapi.responses import JSONResponse
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 def training(app: FastAPI):
     with open('dataset.json', 'r', encoding='utf-8') as f:
@@ -84,9 +85,11 @@ def classify(message: Message):
     }
 
 @app.post('/training')
-def training_handler():
-    training(app)
-    return JSONResponse(content={'status': 'ok'}, headers={'Connection': 'close'})
+async def training_handler():
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as pool:
+        await loop.run_in_executor(pool, training, app)
+    return {'status': 'ok'}
 
 @app.get('/classes')
 def get_classes():
