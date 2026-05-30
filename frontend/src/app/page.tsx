@@ -13,17 +13,19 @@ type Message = {
 export default function Home() {
 
   const [message, setMessage] = useState<string>('')
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (typeof window === 'undefined') return []
-    const data = localStorage.getItem('messages')
-    return data ? JSON.parse(data) : []
-  })
+  const [messages, setMessages] = useState<Message[]>([])
   const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [initialLoading, setInitialLoading] = useState<boolean>(false)
   const [menu, setMenu] = useState<string>('')
   const [classes, setClasses] = useState<{[key: string]: string} | null>(null)
   const [menuActive, setMenuActive] = useState<boolean>(false)
+
+  useEffect(() => {
+    const data = localStorage.getItem('messages')
+    if (data) setMessages(JSON.parse(data))
+    console.log(messages)
+  }, [])
 
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>): void {
     e.preventDefault() 
@@ -59,7 +61,8 @@ export default function Home() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    localStorage.setItem('messages', JSON.stringify(messages))
+    if (messages.length > 0)
+      localStorage.setItem('messages', JSON.stringify(messages))
   }, [messages])
 
   useEffect(() => {
