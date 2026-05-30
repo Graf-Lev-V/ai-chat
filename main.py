@@ -23,7 +23,7 @@ def training(app: FastAPI):
     texts_train, texts_test, labels_train, labels_test = train_test_split(all_texts, all_labels, test_size=0.2, random_state=42)
     app.state.vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5))
     X = app.state.vectorizer.fit_transform(texts_train)
-    app.state.model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000, verbose=True)
+    app.state.model = MLPClassifier(hidden_layer_sizes=(64,), max_iter=1000)
     app.state.model.fit(X, labels_train)
     app.state.texts_test = texts_test
     app.state.labels_test = labels_test

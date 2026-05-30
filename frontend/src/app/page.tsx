@@ -24,7 +24,6 @@ export default function Home() {
   useEffect(() => {
     const data = localStorage.getItem('messages')
     if (data) setMessages(JSON.parse(data))
-    console.log(messages)
   }, [])
 
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>): void {
