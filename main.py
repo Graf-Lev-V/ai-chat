@@ -9,6 +9,7 @@ import os
 import json
 from contextlib import asynccontextmanager
 from sklearn.model_selection import train_test_split
+from fastapi.responses import JSONResponse
 
 def training(app: FastAPI):
     with open('dataset.json', 'r', encoding='utf-8') as f:
@@ -85,7 +86,7 @@ def classify(message: Message):
 @app.post('/training')
 def training_handler():
     training(app)
-    return {'status': 'Training started'}
+    return JSONResponse(content={'status': 'ok'}, headers={'Connection': 'close'})
 
 @app.get('/classes')
 def get_classes():

@@ -12,9 +12,10 @@ export default function Header() {
         setError(null)
         setLoading(true)
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/training`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/training`, {
             method: 'POST'
             })
+            
         }
         catch (error) {
             if (error instanceof Error) {
